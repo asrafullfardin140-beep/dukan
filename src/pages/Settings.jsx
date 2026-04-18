@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { getShopProfile, saveShopProfile, uploadMedia } from '../lib/storage';
+import { getShopProfile, saveShopProfile } from '../lib/storage';
 import { Camera, CheckCircle, Settings, Loader2 } from 'lucide-react';
 
 const InputField = ({ label, name, type = 'text', placeholder, rows, profile, onChange }) => (
@@ -58,24 +58,18 @@ export default function SettingsPage() {
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { alert('Image too large. Please use under 2MB.'); return; }
     
-    // Optimistic UI update
-    const reader = new FileReader();
-    reader.onloadend = () => setProfile((prev) => ({ ...prev, [field]: reader.result }));
-    reader.readAsDataURL(file);
-
     setSaving(true);
-    // Background upload
-    const url = await uploadMedia(file, field);
-    if (url) {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const base64Data = reader.result;
       setProfile((prev) => {
-        const updated = { ...prev, [field]: url };
-        saveShopProfile(updated); // Auto-save after upload
+        const updated = { ...prev, [field]: base64Data };
+        saveShopProfile(updated); // Save base64 directly to Postgres text column
         return updated;
       });
-    } else {
-      alert('Failed to upload image to cloud.');
-    }
-    setSaving(false);
+      setSaving(false);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
