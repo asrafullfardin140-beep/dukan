@@ -63,11 +63,19 @@ export default function SettingsPage() {
     reader.onloadend = () => setProfile((prev) => ({ ...prev, [field]: reader.result }));
     reader.readAsDataURL(file);
 
+    setSaving(true);
     // Background upload
     const url = await uploadMedia(file, field);
     if (url) {
-      setProfile((prev) => ({ ...prev, [field]: url }));
+      setProfile((prev) => {
+        const updated = { ...prev, [field]: url };
+        saveShopProfile(updated); // Auto-save after upload
+        return updated;
+      });
+    } else {
+      alert('Failed to upload image to cloud.');
     }
+    setSaving(false);
   };
 
   const handleSave = async () => {

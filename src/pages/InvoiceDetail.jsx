@@ -92,17 +92,54 @@ export default function InvoiceDetail() {
   };
 
   const handleShare = async () => {
-    if (navigator.share) {
-      try {
+    if (!navigator.share) {
+      alert('Web Share not supported by your browser. Please use Download PDF.');
+      return;
+    }
+
+    setPdfLoading(true);
+    const el = document.getElementById('invoice-pdf-render');
+    if (!el) { setPdfLoading(false); return; }
+
+    el.style.visibility = 'visible';
+    el.style.position = 'fixed';
+    el.style.left = '-9999px';
+    el.style.top = '0';
+    el.style.display = 'block';
+    el.style.width = '794px';
+
+    try {
+      await new Promise((r) => setTimeout(r, 200));
+      const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      
+      const pdfBlob = pdf.output('blob');
+      const file = new File([pdfBlob], `Invoice_${invoice.id}.pdf`, { type: 'application/pdf' });
+
+      el.style.display = 'none';
+      setPdfLoading(false);
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: `Invoice ${invoice.id} — ${invoice.customerName}`,
+        });
+      } else {
         await navigator.share({
           title: `Invoice ${invoice.id} — ${invoice.customerName}`,
-          text: `Invoice ${invoice.id}\nCustomer: ${invoice.customerName}\nTotal: ${formatBDT(invoice.total)}\nBalance: ${formatBDT(invoice.balance)}`,
+          text: `Invoice ${invoice.id}\nCustomer: ${invoice.customerName}\nTotal: ${formatBDT(invoice.total)}\nBalance: ${formatBDT(invoice.balance)}\n(PDF attachment not supported by this app)`,
         });
-      } catch (err) {
-        if (err.name !== 'AbortError') alert('Sharing failed.');
       }
-    } else {
-      alert('Web Share not supported. Please use Download PDF.');
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        alert('Sharing failed. Try downloading instead.');
+      }
+      el.style.display = 'none';
+      setPdfLoading(false);
     }
   };
 
