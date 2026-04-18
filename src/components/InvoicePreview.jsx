@@ -2,12 +2,10 @@ import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { formatBDT } from '../lib/currency';
 import { amountToWords } from '../lib/amountInWords';
-import { getShopProfile } from '../lib/storage';
 import { format } from 'date-fns';
 
-export default function InvoicePreview({ invoice }) {
+export default function InvoicePreview({ invoice, shop = {} }) {
   const { lang, toBnNum, t } = useLanguage();
-  const shop = getShopProfile();
 
   if (!invoice) return null;
 

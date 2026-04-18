@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { getInvoice, deleteInvoice } from '../lib/storage';
+import { getInvoice, deleteInvoice, getShopProfile } from '../lib/storage';
 import InvoicePreview from '../components/InvoicePreview';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -21,6 +21,7 @@ export default function InvoiceDetail() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [invoice, setInvoice] = useState(null);
+  const [shop, setShop] = useState(null);
   const [loading, setLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
   const printRef = useRef(null);
@@ -39,9 +40,11 @@ export default function InvoiceDetail() {
   useEffect(() => {
     async function load() {
       const data = await getInvoice(id);
+      const shopData = await getShopProfile();
       if (!data) navigate('/');
       else {
         setInvoice(data);
+        setShop(shopData);
         setLoading(false);
         // schedule height update after render
         setTimeout(updateContainerHeight, 100);
@@ -208,7 +211,7 @@ export default function InvoiceDetail() {
                 pointerEvents: 'none',
               }}
             >
-              <InvoicePreview invoice={invoice} />
+              <InvoicePreview invoice={invoice} shop={shop} />
             </div>
           </div>
         </div>
@@ -219,7 +222,7 @@ export default function InvoiceDetail() {
         id="invoice-pdf-render"
         style={{ display: 'none', width: '794px', background: '#fff' }}
       >
-        <InvoicePreview invoice={invoice} />
+        <InvoicePreview invoice={invoice} shop={shop} />
       </div>
 
       {/* Action Buttons */}
