@@ -3,6 +3,35 @@ import { useLanguage } from '../context/LanguageContext';
 import { getShopProfile, saveShopProfile } from '../lib/storage';
 import { Camera, CheckCircle, Settings } from 'lucide-react';
 
+const InputField = ({ label, name, type = 'text', placeholder, rows, profile, onChange }) => (
+  <div>
+    <label className="block text-sm font-semibold text-gray-600 mb-1.5">{label}</label>
+    {rows ? (
+      <textarea name={name} value={profile[name]} onChange={onChange} rows={rows} placeholder={placeholder}
+        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#1AABDD] focus:bg-white text-gray-800 text-sm transition-colors resize-none" />
+    ) : (
+      <input type={type} name={name} value={profile[name]} onChange={onChange} placeholder={placeholder}
+        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#1AABDD] focus:bg-white text-gray-800 text-sm transition-colors" />
+    )}
+  </div>
+);
+
+const ImageUploadBox = ({ label, field, profile, setProfile, handleImageUpload, wide = false }) => (
+  <div>
+    <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">{label}</label>
+    <label className="cursor-pointer block">
+      <div className={`${wide ? 'w-36 h-20' : 'w-20 h-20'} rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden hover:border-[#1AABDD] hover:bg-[#1AABDD]/5 transition-colors`}>
+        {profile[field]
+          ? <img src={profile[field]} alt={label} className="w-full h-full object-contain p-1" />
+          : <><Camera size={20} className="text-gray-400 mb-1" /><span className="text-[10px] text-gray-400 font-medium">Upload</span></>
+        }
+      </div>
+      <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, field)} className="hidden" />
+    </label>
+    {profile[field] && <button type="button" onClick={() => setProfile((p) => ({ ...p, [field]: '' }))} className="text-xs text-red-400 mt-1 font-medium">Remove</button>}
+  </div>
+);
+
 export default function SettingsPage() {
   const { lang, setLang, t } = useLanguage();
   const [saved, setSaved] = useState(false);
@@ -29,35 +58,6 @@ export default function SettingsPage() {
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
-
-  const InputField = ({ label, name, type = 'text', placeholder, rows }) => (
-    <div>
-      <label className="block text-sm font-semibold text-gray-600 mb-1.5">{label}</label>
-      {rows ? (
-        <textarea name={name} value={profile[name]} onChange={handleChange} rows={rows} placeholder={placeholder}
-          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#1AABDD] focus:bg-white text-gray-800 text-sm transition-colors resize-none" />
-      ) : (
-        <input type={type} name={name} value={profile[name]} onChange={handleChange} placeholder={placeholder}
-          className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#1AABDD] focus:bg-white text-gray-800 text-sm transition-colors" />
-      )}
-    </div>
-  );
-
-  const ImageUploadBox = ({ label, field, wide = false }) => (
-    <div>
-      <label className="block text-xs font-semibold text-gray-500 mb-2 uppercase tracking-wider">{label}</label>
-      <label className="cursor-pointer block">
-        <div className={`${wide ? 'w-36 h-20' : 'w-20 h-20'} rounded-2xl border-2 border-dashed border-gray-300 flex flex-col items-center justify-center bg-gray-50 overflow-hidden hover:border-[#1AABDD] hover:bg-[#1AABDD]/5 transition-colors`}>
-          {profile[field]
-            ? <img src={profile[field]} alt={label} className="w-full h-full object-contain p-1" />
-            : <><Camera size={20} className="text-gray-400 mb-1" /><span className="text-[10px] text-gray-400 font-medium">Upload</span></>
-          }
-        </div>
-        <input type="file" accept="image/*" onChange={(e) => handleImageUpload(e, field)} className="hidden" />
-      </label>
-      {profile[field] && <button type="button" onClick={() => setProfile((p) => ({ ...p, [field]: '' }))} className="text-xs text-red-400 mt-1 font-medium">Remove</button>}
-    </div>
-  );
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-[#F0F8FB] pb-24">
@@ -100,13 +100,13 @@ export default function SettingsPage() {
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 space-y-4">
           <h2 className="text-base font-black text-gray-800">{t('shopProfile')}</h2>
           <div className="flex gap-6 pb-2">
-            <ImageUploadBox label={t('logo')} field="logo" />
-            <ImageUploadBox label={t('signature')} field="signature" wide />
+            <ImageUploadBox label={t('logo')} field="logo" profile={profile} setProfile={setProfile} handleImageUpload={handleImageUpload} />
+            <ImageUploadBox label={t('signature')} field="signature" profile={profile} setProfile={setProfile} handleImageUpload={handleImageUpload} wide />
           </div>
-          <InputField label={t('shopNameBn')} name="nameBn" placeholder="e.g. ভাই ভাই এন্টারপ্রাইজ" />
-          <InputField label={t('shopNameEn')} name="nameEn" placeholder="e.g. Bhai Bhai Enterprise" />
-          <InputField label={t('phone')} name="phone" type="tel" placeholder="01XXXXXXXXX" />
-          <InputField label={t('address')} name="address" placeholder="Full shop address" rows={2} />
+          <InputField label={t('shopNameBn')} name="nameBn" placeholder="e.g. ভাই ভাই এন্টারপ্রাইজ" profile={profile} onChange={handleChange} />
+          <InputField label={t('shopNameEn')} name="nameEn" placeholder="e.g. Bhai Bhai Enterprise" profile={profile} onChange={handleChange} />
+          <InputField label={t('phone')} name="phone" type="tel" placeholder="01XXXXXXXXX" profile={profile} onChange={handleChange} />
+          <InputField label={t('address')} name="address" placeholder="Full shop address" rows={2} profile={profile} onChange={handleChange} />
         </div>
 
         {/* Terms */}
