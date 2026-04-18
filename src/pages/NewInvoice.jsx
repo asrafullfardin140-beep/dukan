@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { getNextInvoiceNumber, saveInvoice, getInvoices, getInvoice } from '../lib/storage';
 import { amountToWords } from '../lib/amountInWords';
 import { formatBDT } from '../lib/currency';
-import { ArrowLeft, ArrowRight, UserPlus, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, UserPlus, Trash2, Loader2 } from 'lucide-react';
 
 // ─── Step 1: Customer Details ─────────────────────────────────────────────────
 function StepCustomer({ invoice, onChange, recentCustomers, onSelectRecent }) {
@@ -182,6 +182,8 @@ export default function NewInvoice() {
   const navigate = useNavigate();
   const { id } = useParams();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [recentCustomers, setRecentCustomers] = useState([]);
 
   const [invoice, setInvoice] = useState({
@@ -193,19 +195,24 @@ export default function NewInvoice() {
   });
 
   useEffect(() => {
-    if (id) {
-      const existing = getInvoice(id);
-      if (existing) {
-        setInvoice(existing);
+    async function loadData() {
+      if (id) {
+        const existing = await getInvoice(id);
+        if (existing) {
+          setInvoice(existing);
+        } else {
+          navigate('/');
+        }
       } else {
-        navigate('/');
+        const nextId = await getNextInvoiceNumber();
+        setInvoice((prev) => ({ ...prev, id: nextId }));
       }
-    } else {
-      setInvoice((prev) => ({ ...prev, id: getNextInvoiceNumber() }));
+      const all = await getInvoices();
+      const names = [...new Set(all.map((i) => i.customerName).filter(Boolean))].slice(0, 5);
+      setRecentCustomers(names);
+      setLoading(false);
     }
-    const all = getInvoices();
-    const names = [...new Set(all.map((i) => i.customerName).filter(Boolean))].slice(0, 5);
-    setRecentCustomers(names);
+    loadData();
   }, [id, navigate]);
 
   useEffect(() => {
@@ -224,8 +231,9 @@ export default function NewInvoice() {
     setInvoice((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-  const handleSelectRecent = useCallback((name) => {
-    const match = getInvoices().find((i) => i.customerName === name);
+  const handleSelectRecent = useCallback(async (name) => {
+    const all = await getInvoices();
+    const match = all.find((i) => i.customerName === name);
     setInvoice((prev) => ({ ...prev, customerName: name, customerPhone: match?.customerPhone || prev.customerPhone, customerLocation: match?.customerLocation || prev.customerLocation }));
   }, []);
 
@@ -246,7 +254,19 @@ export default function NewInvoice() {
     setStep((s) => Math.min(s + 1, 3));
   };
 
-  const handleSaveAndPreview = () => { saveInvoice(invoice); navigate(`/invoice/${invoice.id}`); };
+  const handleSaveAndPreview = async () => { 
+    setSaving(true);
+    await saveInvoice(invoice); 
+    navigate(`/invoice/${invoice.id}`); 
+  };
+
+  if (loading) {
+    return (
+      <div className="flex bg-[#F0F8FB] min-h-screen items-center justify-center">
+        <Loader2 className="animate-spin text-[#1AABDD]" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-[#F0F8FB]">
@@ -304,9 +324,10 @@ export default function NewInvoice() {
             {t('next')} <ArrowRight size={20} />
           </button>
         ) : (
-          <button type="button" onClick={handleSaveAndPreview}
-            className="flex-1 h-14 bg-[#1AABDD] text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform text-base">
-            👁 {t('previewBtn')}
+          <button type="button" onClick={handleSaveAndPreview} disabled={saving}
+            className="flex-1 h-14 bg-[#1AABDD] text-white font-bold rounded-2xl flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform text-base disabled:opacity-70">
+            {saving ? <Loader2 size={20} className="animate-spin" /> : '👁'} 
+            {saving ? 'Saving...' : t('previewBtn')}
           </button>
         )}
       </div>

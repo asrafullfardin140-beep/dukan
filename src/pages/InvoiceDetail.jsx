@@ -21,6 +21,7 @@ export default function InvoiceDetail() {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [invoice, setInvoice] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
   const printRef = useRef(null);
   const scaleRef = useRef(null);
@@ -36,18 +37,22 @@ export default function InvoiceDetail() {
   };
 
   useEffect(() => {
-    const data = getInvoice(id);
-    if (!data) navigate('/');
-    else {
-      setInvoice(data);
-      // schedule height update after render
-      setTimeout(updateContainerHeight, 100);
+    async function load() {
+      const data = await getInvoice(id);
+      if (!data) navigate('/');
+      else {
+        setInvoice(data);
+        setLoading(false);
+        // schedule height update after render
+        setTimeout(updateContainerHeight, 100);
+      }
     }
+    load();
   }, [id, navigate]);
 
-  const handleDelete = () => {
-    if (window.confirm('Delete this invoice?')) {
-      deleteInvoice(id);
+  const handleDelete = async () => {
+    if (window.confirm(t('delete') + '?')) {
+      await deleteInvoice(id);
       navigate('/');
     }
   };

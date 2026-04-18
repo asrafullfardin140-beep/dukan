@@ -22,9 +22,11 @@ export default function Home() {
   const [invoices, setInvoices] = useState([]);
   const [stats, setStats] = useState({ count: 0, collected: 0, due: 0 });
   const [shopName, setShopName] = useState('HisabBook');
+  const [loading, setLoading] = useState(true);
 
-  const loadData = () => {
-    const data = getInvoices();
+  const loadData = async () => {
+    setLoading(true);
+    const data = await getInvoices();
     setInvoices(data);
     let collected = 0, due = 0;
     data.forEach((inv) => {
@@ -32,15 +34,20 @@ export default function Home() {
       due += Number(inv.balance || 0);
     });
     setStats({ count: data.length, collected, due });
-    const profile = getShopProfile();
-    setShopName(lang === 'bn' && profile.nameBn ? profile.nameBn : profile.nameEn || 'HisabBook');
+    
+    const profile = await getShopProfile();
+    setShopName(lang === 'bn' && profile?.nameBn ? profile.nameBn : profile?.nameEn || 'HisabBook');
+    setLoading(false);
   };
 
   useEffect(() => { loadData(); }, [lang]);
 
-  const handleDelete = (e, id) => {
+  const handleDelete = async (e, id) => {
     e.stopPropagation();
-    if (window.confirm('Delete this invoice?')) { deleteInvoice(id); loadData(); }
+    if (window.confirm('Delete this invoice?')) { 
+      await deleteInvoice(id); 
+      loadData(); 
+    }
   };
 
   const formatDate = (ds) => { try { return format(new Date(ds), 'd MMM, yyyy'); } catch { return ds; } };
@@ -91,7 +98,11 @@ export default function Home() {
           <span className="text-sm text-[#1AABDD] font-semibold">{toBnNum(invoices.length)} টি</span>
         </div>
 
-        {invoices.length === 0 ? (
+        {loading ? (
+          <div className="flex justify-center py-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1AABDD]"></div>
+          </div>
+        ) : invoices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-14 bg-white rounded-2xl border-2 border-dashed border-[#1AABDD]/30">
             <Receipt size={40} className="text-[#1AABDD]/30 mb-3" />
             <p className="text-gray-400 font-medium text-sm">নতুন ইনভয়েস তৈরি করুন</p>

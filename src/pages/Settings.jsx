@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { getShopProfile, saveShopProfile } from '../lib/storage';
-import { Camera, CheckCircle, Settings } from 'lucide-react';
+import { getShopProfile, saveShopProfile, uploadMedia } from '../lib/storage';
+import { Camera, CheckCircle, Settings, Loader2 } from 'lucide-react';
 
 const InputField = ({ label, name, type = 'text', placeholder, rows, profile, onChange }) => (
   <div>
@@ -35,29 +35,56 @@ const ImageUploadBox = ({ label, field, profile, setProfile, handleImageUpload, 
 export default function SettingsPage() {
   const { lang, setLang, t } = useLanguage();
   const [saved, setSaved] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState({ nameEn: '', nameBn: '', phone: '', address: '', logo: '', signature: '', terms: '' });
 
-  useEffect(() => { setProfile(getShopProfile()); }, []);
+  useEffect(() => { 
+    async function load() {
+      const data = await getShopProfile();
+      if (data) setProfile(data);
+      setLoading(false);
+    }
+    load();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (e, field) => {
+  const handleImageUpload = async (e, field) => {
     const file = e.target.files[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { alert('Image too large. Please use under 2MB.'); return; }
+    
+    // Optimistic UI update
     const reader = new FileReader();
     reader.onloadend = () => setProfile((prev) => ({ ...prev, [field]: reader.result }));
     reader.readAsDataURL(file);
+
+    // Background upload
+    const url = await uploadMedia(file, field);
+    if (url) {
+      setProfile((prev) => ({ ...prev, [field]: url }));
+    }
   };
 
-  const handleSave = () => {
-    saveShopProfile(profile);
+  const handleSave = async () => {
+    setSaving(true);
+    await saveShopProfile(profile);
+    setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F0F8FB]">
+        <Loader2 className="animate-spin text-[#1AABDD]" size={32} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-[100dvh] bg-[#F0F8FB] pb-24">
@@ -118,10 +145,10 @@ export default function SettingsPage() {
         </div>
 
         {/* Save Button */}
-        <button onClick={handleSave}
-          className={`w-full h-14 rounded-2xl font-bold text-base transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${saved ? 'bg-green-500 text-white' : 'bg-[#1AABDD] text-white'}`}>
-          {saved ? <CheckCircle size={20} /> : null}
-          {saved ? (lang === 'bn' ? 'সেভ হয়েছে!' : 'Saved!') : t('save')}
+        <button onClick={handleSave} disabled={saving}
+          className={`w-full h-14 rounded-2xl font-bold text-base transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${saved ? 'bg-green-500 text-white' : 'bg-[#1AABDD] text-white disabled:opacity-70'}`}>
+          {saving ? <Loader2 size={20} className="animate-spin" /> : saved ? <CheckCircle size={20} /> : null}
+          {saving ? 'Saving...' : saved ? (lang === 'bn' ? 'সেভ হয়েছে!' : 'Saved!') : t('save')}
         </button>
       </div>
     </div>
