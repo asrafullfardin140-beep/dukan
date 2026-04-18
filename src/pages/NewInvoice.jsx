@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { getNextInvoiceNumber, saveInvoice, getInvoices } from '../lib/storage';
+import { getNextInvoiceNumber, saveInvoice, getInvoices, getInvoice } from '../lib/storage';
 import { amountToWords } from '../lib/amountInWords';
 import { formatBDT } from '../lib/currency';
 import { ArrowLeft, ArrowRight, UserPlus, Trash2 } from 'lucide-react';
@@ -180,6 +180,7 @@ function StepSummary({ invoice, onChange }) {
 export default function NewInvoice() {
   const { t, toBnNum } = useLanguage();
   const navigate = useNavigate();
+  const { id } = useParams();
   const [step, setStep] = useState(1);
   const [recentCustomers, setRecentCustomers] = useState([]);
 
@@ -192,11 +193,20 @@ export default function NewInvoice() {
   });
 
   useEffect(() => {
-    setInvoice((prev) => ({ ...prev, id: getNextInvoiceNumber() }));
+    if (id) {
+      const existing = getInvoice(id);
+      if (existing) {
+        setInvoice(existing);
+      } else {
+        navigate('/');
+      }
+    } else {
+      setInvoice((prev) => ({ ...prev, id: getNextInvoiceNumber() }));
+    }
     const all = getInvoices();
     const names = [...new Set(all.map((i) => i.customerName).filter(Boolean))].slice(0, 5);
     setRecentCustomers(names);
-  }, []);
+  }, [id, navigate]);
 
   useEffect(() => {
     const subtotal = invoice.items.reduce((acc, item) => acc + Number(item.qty || 0) * Number(item.price || 0), 0);
@@ -246,7 +256,7 @@ export default function NewInvoice() {
           <button type="button" onClick={() => navigate('/')} className="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center text-white">
             <ArrowLeft size={20} />
           </button>
-          <h1 className="text-lg font-black text-white flex-1">{t('newInvoice')}</h1>
+          <h1 className="text-lg font-black text-white flex-1">{id ? `Edit #${invoice.id}` : t('newInvoice')}</h1>
         </div>
         {/* Progress in header */}
         <div className="flex items-center justify-center gap-3 mt-4">

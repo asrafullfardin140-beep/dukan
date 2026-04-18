@@ -69,6 +69,8 @@ export default {
   downloadPdf: 'পিডিএফ ডাউনলোড',
   print: 'প্রিন্ট করুন',
   delete: 'ডিলিট করুন',
+  edit: 'এডিট করুন',
+  editInvoice: 'এডিট ইনভয়েস',
   
   // Invoice Document
   invoiceTitle: 'ইনভয়েস',

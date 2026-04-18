@@ -5,7 +5,7 @@ import { getInvoice, deleteInvoice } from '../lib/storage';
 import InvoicePreview from '../components/InvoicePreview';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
-import { ArrowLeft, Share2, Download, Printer, Trash2, Loader2 } from 'lucide-react';
+import { ArrowLeft, Share2, Download, Printer, Trash2, Loader2, Edit3 } from 'lucide-react';
 import { formatBDT } from '../lib/currency';
 
 function StatusBadge({ invoice }) {
@@ -182,7 +182,14 @@ export default function InvoiceDetail() {
 
       {/* Action Buttons */}
       <div className="bg-white px-4 py-4 border-t border-gray-100 shadow-[0_-8px_20px_rgba(0,0,0,0.06)] sticky bottom-0 z-50">
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-4 gap-3">
+          <button
+            onClick={() => navigate(`/edit/${invoice.id}`)}
+            className="flex flex-col items-center justify-center gap-1.5 py-4 rounded-2xl bg-orange-50 text-orange-600 font-bold active:scale-95 transition-transform"
+          >
+            <Edit3 size={22} />
+            <span className="text-xs">{t('edit')}</span>
+          </button>
           <button
             onClick={handleShare}
             className="flex flex-col items-center justify-center gap-1.5 py-4 rounded-2xl bg-blue-50 text-blue-600 font-bold active:scale-95 transition-transform"

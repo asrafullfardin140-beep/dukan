@@ -69,6 +69,8 @@ export default {
   downloadPdf: 'Download PDF',
   print: 'Print',
   delete: 'Delete',
+  edit: 'Edit',
+  editInvoice: 'Edit Invoice',
   
   // Invoice Document
   invoiceTitle: 'Invoice',

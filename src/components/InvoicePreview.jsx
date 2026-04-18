@@ -21,7 +21,7 @@ export default function InvoicePreview({ invoice }) {
   const isUnpaid = Number(invoice.received || 0) === 0;
   const isPaid = Number(invoice.received || 0) >= Number(invoice.total || 0) && Number(invoice.total) > 0;
   const statusLabel = isPaid ? 'PAID' : isUnpaid ? 'UNPAID' : 'PARTIAL';
-  const statusColor = isPaid ? '#6B7C3F' : isUnpaid ? '#DC2626' : '#9333EA';
+  const statusColor = isPaid ? '#1AABDD' : isUnpaid ? '#DC2626' : '#9333EA';
 
   return (
     <div
@@ -37,7 +37,7 @@ export default function InvoicePreview({ invoice }) {
       }}
     >
       {/* ── HEADER ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', borderBottom: '3px solid #6B7C3F', paddingBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', borderBottom: '3px solid #1AABDD', paddingBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {shop.logo && (
             <div style={{ width: '72px', height: '72px', border: '1px solid #e5e7eb', borderRadius: '12px', overflow: 'hidden', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -45,7 +45,7 @@ export default function InvoicePreview({ invoice }) {
             </div>
           )}
           <div>
-            <div style={{ fontSize: '24px', fontWeight: 900, color: '#4A5A2A', lineHeight: 1.2 }}>
+            <div style={{ fontSize: '24px', fontWeight: 900, color: '#0D8CBB', lineHeight: 1.2 }}>
               {lang === 'bn' ? (shop.nameBn || shop.nameEn) : (shop.nameEn || shop.nameBn)}
             </div>
             {shop.nameBn && shop.nameEn && (
@@ -59,13 +59,13 @@ export default function InvoicePreview({ invoice }) {
         </div>
 
         <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '36px', fontWeight: 900, color: '#6B7C3F', letterSpacing: '3px', textTransform: 'uppercase' }}>
+          <div style={{ fontSize: '36px', fontWeight: 900, color: '#1AABDD', letterSpacing: '3px', textTransform: 'uppercase' }}>
             {t('invoiceTitle')}
           </div>
           <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
             <div style={{ display: 'flex', gap: '8px', fontSize: '13px' }}>
               <span style={{ color: '#9ca3af', fontWeight: 600 }}>{t('invoiceNo')} :</span>
-              <span style={{ fontWeight: 900, color: '#4A5A2A' }}>{invoice.id}</span>
+              <span style={{ fontWeight: 900, color: '#0D8CBB' }}>{invoice.id}</span>
             </div>
             <div style={{ display: 'flex', gap: '8px', fontSize: '13px' }}>
               <span style={{ color: '#9ca3af', fontWeight: 600 }}>{t('date')} :</span>
@@ -93,7 +93,7 @@ export default function InvoicePreview({ invoice }) {
       {/* ── ITEMS TABLE ── */}
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '32px' }}>
         <thead>
-          <tr style={{ background: '#6B7C3F', color: '#ffffff' }}>
+          <tr style={{ background: '#1AABDD', color: '#ffffff' }}>
             {['#', 'Item & Description', 'Qty', 'Price/Unit', 'Amount'].map((h, i) => (
               <th key={i} style={{ padding: '10px 14px', textAlign: i === 0 ? 'center' : i >= 3 ? 'right' : 'left', fontSize: '12px', fontWeight: 700, letterSpacing: '0.5px', width: i === 0 ? '40px' : i === 2 ? '60px' : i >= 3 ? '110px' : 'auto' }}>
                 {h}
@@ -129,7 +129,7 @@ export default function InvoicePreview({ invoice }) {
           {shop.terms && (
             <div style={{ marginBottom: '16px' }}>
               <div style={{ fontSize: '10px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '6px' }}>{t('termsDesc')}</div>
-              <div style={{ fontSize: '12px', color: '#4b5563', background: '#fffbf0', borderLeft: '3px solid #6B7C3F', paddingLeft: '12px', padding: '10px 10px 10px 14px', borderRadius: '0 8px 8px 0' }}>{shop.terms}</div>
+              <div style={{ fontSize: '12px', color: '#4b5563', background: '#e5f6fc', borderLeft: '3px solid #1AABDD', paddingLeft: '12px', padding: '10px 10px 10px 14px', borderRadius: '0 8px 8px 0' }}>{shop.terms}</div>
             </div>
           )}
 
@@ -154,7 +154,7 @@ export default function InvoicePreview({ invoice }) {
                 <span style={{ fontWeight: 700, color: '#DC2626' }}>-{formatBDT(invoice.discountAmount)}</span>
               </div>
             )}
-            <div style={{ background: '#6B7C3F', padding: '14px 16px', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ background: '#1AABDD', padding: '14px 16px', display: 'flex', justifyContent: 'space-between' }}>
               <span style={{ color: '#fff', fontWeight: 800, fontSize: '15px' }}>{t('totalBill')}</span>
               <span style={{ color: '#fff', fontWeight: 900, fontSize: '18px' }}>{formatBDT(invoice.total)}</span>
             </div>
@@ -178,7 +178,7 @@ export default function InvoicePreview({ invoice }) {
             ? <img src={shop.signature} alt="Signature" style={{ height: '60px', objectFit: 'contain', marginBottom: '8px', display: 'block', margin: '0 auto 8px' }} />
             : <div style={{ height: '60px', width: '200px', borderBottom: '1px dashed #9ca3af', marginBottom: '8px' }} />
           }
-          <div style={{ borderTop: '2px solid #4A5A2A', paddingTop: '8px', fontWeight: 700, color: '#4A5A2A', fontSize: '13px', width: '200px', textAlign: 'center' }}>
+          <div style={{ borderTop: '2px solid #0D8CBB', paddingTop: '8px', fontWeight: 700, color: '#0D8CBB', fontSize: '13px', width: '200px', textAlign: 'center' }}>
             {t('authorizedSign')}
           </div>
         </div>
