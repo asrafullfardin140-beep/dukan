@@ -24,7 +24,7 @@ export default function InvoicePreview({ invoice, shop = {} }) {
   return (
     <div
       style={{
-        fontFamily: '"Hind Siliguri", sans-serif',
+        fontFamily: '"Inter", "Noto Sans Bengali", sans-serif',
         background: '#ffffff',
         width: '100%',
         padding: '50px',
@@ -38,8 +38,8 @@ export default function InvoicePreview({ invoice, shop = {} }) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px', borderBottom: '3px solid #1AABDD', paddingBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           {shop.logo && (
-            <div style={{ width: '94px', height: '94px', border: '1px solid #e5e7eb', borderRadius: '14px', overflow: 'hidden', padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <img src={shop.logo} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            <div style={{ maxWidth: '280px', maxHeight: '140px', display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+              <img src={shop.logo} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', borderRadius: '8px' }} />
             </div>
           )}
           <div>
