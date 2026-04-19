@@ -138,14 +138,6 @@ export default function SettingsPage() {
           <InputField label={t('address')} name="address" placeholder="Full shop address" rows={2} profile={profile} onChange={handleChange} />
         </div>
 
-        {/* Terms */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
-          <h2 className="text-base font-black text-gray-800 mb-4">{t('termsDesc')}</h2>
-          <textarea name="terms" value={profile.terms} onChange={handleChange} rows={4}
-            placeholder="আমাদের প্রতিষ্ঠান থেকে আপনি কখনাই প্রতারিত হবেন না। ইনশাআল্লাহ।"
-            className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:border-[#1AABDD] focus:bg-white text-gray-800 text-sm resize-none" />
-        </div>
-
         {/* Save Button */}
         <button onClick={handleSave} disabled={saving}
           className={`w-full h-14 rounded-2xl font-bold text-base transition-all active:scale-95 shadow-lg flex items-center justify-center gap-2 ${saved ? 'bg-green-500 text-white' : 'bg-[#1AABDD] text-white disabled:opacity-70'}`}>

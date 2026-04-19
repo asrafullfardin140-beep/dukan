@@ -124,12 +124,6 @@ export default function InvoicePreview({ invoice, shop = {} }) {
             <div style={{ fontWeight: 700, color: '#111827', fontSize: '17px', fontStyle: 'italic' }}>{amountToWords(Math.floor(invoice.total || 0))}</div>
           </div>
 
-          {shop.terms && (
-            <div style={{ marginBottom: '24px' }}>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>{t('termsDesc')}</div>
-              <div style={{ fontSize: '16px', color: '#4b5563', background: '#e5f6fc', borderLeft: '4px solid #1AABDD', paddingLeft: '16px', padding: '14px 14px 14px 18px', borderRadius: '0 10px 10px 0' }}>{shop.terms}</div>
-            </div>
-          )}
 
           {invoice.note && (
             <div style={{ borderLeft: '4px solid #f59e0b', paddingLeft: '16px', padding: '14px 14px 14px 18px', background: '#fffbf0', borderRadius: '0 10px 10px 0' }}>
