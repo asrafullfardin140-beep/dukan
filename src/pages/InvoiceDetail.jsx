@@ -152,8 +152,14 @@ export default function InvoiceDetail() {
       el.style.display = 'block';
       el.style.visibility = 'visible';
     }
-    window.print();
-    setTimeout(() => { if (el) el.style.display = 'none'; }, 1000);
+    // Wait for browser to repaint before opening print dialog
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        window.print();
+        // Hide element after print dialog closes
+        setTimeout(() => { if (el) el.style.display = 'none'; }, 500);
+      }, 300);
+    });
   };
 
   if (!invoice) {
