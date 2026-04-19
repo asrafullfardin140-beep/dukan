@@ -169,9 +169,13 @@ export default function InvoiceDetail() {
       {/* Print CSS */}
       <style>{`
         @media print {
+          body, * { 
+            -webkit-print-color-adjust: exact !important; 
+            print-color-adjust: exact !important; 
+          }
           body { background: white !important; margin: 0; padding: 0; }
           .hide-on-print { display: none !important; }
-          #invoice-pdf-render { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          #invoice-pdf-render { display: block !important; position: relative !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
           @page { size: portrait; margin: 0; }
         }
       `}</style>
