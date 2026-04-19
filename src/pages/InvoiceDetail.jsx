@@ -169,13 +169,15 @@ export default function InvoiceDetail() {
       {/* Print CSS */}
       <style>{`
         @media print {
-          body > * { display: none !important; }
-          #invoice-pdf-render { display: block !important; position: static !important; visibility: visible !important; width: 100% !important; }
+          body { background: white !important; margin: 0; padding: 0; }
+          .hide-on-print { display: none !important; }
+          #invoice-pdf-render { display: block !important; position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+          @page { size: portrait; margin: 0; }
         }
       `}</style>
 
       {/* Header */}
-      <div className="bg-white px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+      <div className="hide-on-print bg-white px-5 pt-12 pb-4 flex items-center justify-between sticky top-0 z-10 shadow-sm">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/')} className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center active:scale-95 transition-transform">
             <ArrowLeft size={20} />
@@ -194,7 +196,7 @@ export default function InvoiceDetail() {
       </div>
 
       {/* Preview Area — scaled-down visual */}
-      <div className="flex-1 px-4 py-4 flex items-start justify-center overflow-hidden">
+      <div className="hide-on-print flex-1 px-4 py-4 flex items-start justify-center overflow-hidden">
         <div
           className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
           style={{ width: '100%' }}
@@ -226,7 +228,7 @@ export default function InvoiceDetail() {
       </div>
 
       {/* Action Buttons */}
-      <div className="bg-white px-4 py-4 border-t border-gray-100 shadow-[0_-8px_20px_rgba(0,0,0,0.06)] sticky bottom-0 z-50">
+      <div className="hide-on-print bg-white px-4 py-4 border-t border-gray-100 shadow-[0_-8px_20px_rgba(0,0,0,0.06)] sticky bottom-0 z-50">
         <div className="grid grid-cols-4 gap-3">
           <button
             onClick={() => navigate(`/edit/${invoice.id}`)}
