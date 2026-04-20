@@ -146,20 +146,53 @@ export default function InvoiceDetail() {
     }
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
+    setPdfLoading(true);
     const el = document.getElementById('invoice-pdf-render');
-    if (el) {
-      el.style.display = 'block';
-      el.style.visibility = 'visible';
+    if (!el) { setPdfLoading(false); return; }
+
+    // Move off-screen (not visible but renderable)
+    el.style.display = 'block';
+    el.style.visibility = 'visible';
+    el.style.position = 'fixed';
+    el.style.left = '-9999px';
+    el.style.top = '0';
+    el.style.width = '794px';
+
+    try {
+      await new Promise((r) => setTimeout(r, 300)); // wait for fonts/images
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pdfW = pdf.internal.pageSize.getWidth();
+      const pdfH = (canvas.height * pdfW) / canvas.width;
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+
+      // Open PDF as blob URL in new tab so user can print from PDF viewer
+      const blob = pdf.output('blob');
+      const url = URL.createObjectURL(blob);
+      const tab = window.open(url, '_blank');
+      // Auto-trigger print if the tab opened successfully
+      if (tab) {
+        tab.onload = () => {
+          setTimeout(() => { tab.print(); }, 500);
+        };
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Could not generate print preview. Please use Download PDF instead.');
+    } finally {
+      el.style.display = 'none';
+      el.style.position = '';
+      el.style.left = '';
+      el.style.top = '';
+      setPdfLoading(false);
     }
-    // Wait for browser to repaint before opening print dialog
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        window.print();
-        // Hide element after print dialog closes
-        setTimeout(() => { if (el) el.style.display = 'none'; }, 500);
-      }, 300);
-    });
   };
 
   if (!invoice) {
