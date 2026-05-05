@@ -239,6 +239,7 @@ export default function InvoicePreview({ invoice, shop = {} }) {
             {t('authorizedSign')}
           </div>
         </div>
+      </div>
     </div>
   );
 }
