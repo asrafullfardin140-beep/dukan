@@ -81,9 +81,17 @@ export default function InvoiceDetail() {
       });
       const imgData = canvas.toDataURL('image/jpeg', 0.92);
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      const a4W = pdf.internal.pageSize.getWidth();
+      const a4H = pdf.internal.pageSize.getHeight();
+      let pdfW = a4W;
+      let pdfH = (canvas.height * pdfW) / canvas.width;
+      
+      if (pdfH > a4H) {
+        pdfH = a4H;
+        pdfW = (canvas.width * pdfH) / canvas.height;
+      }
+      
+      pdf.addImage(imgData, 'JPEG', (a4W - pdfW) / 2, 0, pdfW, pdfH);
       pdf.save(`${invoice.id}.pdf`);
     } catch (err) {
       console.error(err);
@@ -116,9 +124,17 @@ export default function InvoiceDetail() {
       const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
       const imgData = canvas.toDataURL('image/jpeg', 0.92);
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      const a4W = pdf.internal.pageSize.getWidth();
+      const a4H = pdf.internal.pageSize.getHeight();
+      let pdfW = a4W;
+      let pdfH = (canvas.height * pdfW) / canvas.width;
+      
+      if (pdfH > a4H) {
+        pdfH = a4H;
+        pdfW = (canvas.width * pdfH) / canvas.height;
+      }
+      
+      pdf.addImage(imgData, 'JPEG', (a4W - pdfW) / 2, 0, pdfW, pdfH);
       
       const pdfBlob = pdf.output('blob');
       const file = new File([pdfBlob], `Invoice_${invoice.id}.pdf`, { type: 'application/pdf' });
@@ -169,9 +185,17 @@ export default function InvoiceDetail() {
       });
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pdfW = pdf.internal.pageSize.getWidth();
-      const pdfH = (canvas.height * pdfW) / canvas.width;
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, pdfH);
+      const a4W = pdf.internal.pageSize.getWidth();
+      const a4H = pdf.internal.pageSize.getHeight();
+      let pdfW = a4W;
+      let pdfH = (canvas.height * pdfW) / canvas.width;
+      
+      if (pdfH > a4H) {
+        pdfH = a4H;
+        pdfW = (canvas.width * pdfH) / canvas.height;
+      }
+      
+      pdf.addImage(imgData, 'JPEG', (a4W - pdfW) / 2, 0, pdfW, pdfH);
 
       // Open PDF as blob URL in new tab so user can print from PDF viewer
       const blob = pdf.output('blob');

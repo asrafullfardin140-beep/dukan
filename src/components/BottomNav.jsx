@@ -7,7 +7,7 @@ export default function BottomNav() {
   const { t } = useLanguage();
   const location = useLocation();
 
-  if (location.pathname === '/new' || location.pathname.startsWith('/invoice/')) {
+  if (location.pathname === '/new' || location.pathname.startsWith('/invoice/') || location.pathname.startsWith('/edit/')) {
     return null;
   }
 

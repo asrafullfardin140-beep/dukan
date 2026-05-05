@@ -282,7 +282,9 @@ export default function NewInvoice() {
         <div className="flex items-center justify-center gap-3 mt-4">
           {[1, 2, 3].map((s, i) => (
             <React.Fragment key={s}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all ${step >= s ? 'bg-white text-[#1AABDD] shadow-md' : 'bg-white/20 text-white/60'}`}>
+              <div 
+                onClick={() => { if (step > s || (s === 2 && invoice.customerName.trim())) setStep(s) }}
+                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-all cursor-pointer ${step >= s ? 'bg-white text-[#1AABDD] shadow-md' : 'bg-white/20 text-white/60'}`}>
                 {toBnNum(s)}
               </div>
               {i < 2 && <div className={`flex-1 h-0.5 transition-all ${step > s ? 'bg-white' : 'bg-white/30'}`} />}
