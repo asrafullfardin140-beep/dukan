@@ -231,9 +231,9 @@ export default function InvoicePreview({ invoice, shop = {} }) {
         </div>
         <div style={{ textAlign: 'center' }}>
           {shop.signature ? (
-            <img src={shop.signature} alt="Signature" style={{ height: '140px', objectFit: 'contain', display: 'block', margin: '0 auto 12px' }} />
+            <img src={shop.signature} alt="Signature" style={{ width: '200px', height: '90px', objectFit: 'contain', transform: 'scale(1.5)', display: 'block', margin: '0 auto 12px' }} />
           ) : (
-            <div style={{ height: '140px', width: '200px', marginBottom: '12px' }} />
+            <div style={{ height: '90px', width: '200px', marginBottom: '12px' }} />
           )}
           <div style={{ borderTop: '2px solid #E2E8F0', paddingTop: '12px', fontWeight: 700, color: '#111827', fontSize: '14px', width: '200px', textAlign: 'center' }}>
             {t('authorizedSign')}
