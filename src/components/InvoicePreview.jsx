@@ -42,9 +42,9 @@ export default function InvoicePreview({ invoice, shop = {} }) {
       }}
     >
       {/* ── TOP HEADER ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '28px', marginBottom: hasShopContact ? '18px' : '36px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '28px', marginBottom: '34px' }}>
         {/* Left: Logo & Company Name */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', minWidth: 0, flex: 1 }}>
           {shop.logo ? (
             <img src={shop.logo} alt="Logo" style={{ width: '64px', height: '64px', objectFit: 'contain', borderRadius: '12px' }} />
           ) : (
@@ -52,7 +52,7 @@ export default function InvoicePreview({ invoice, shop = {} }) {
               {(shop.nameEn || shop.nameBn || 'M')[0]}
             </div>
           )}
-          <div>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div style={{ fontSize: '26px', fontWeight: 900, color: '#111827', letterSpacing: '-0.5px' }}>
               {lang === 'bn' ? (shop.nameBn || shop.nameEn) : (shop.nameEn || shop.nameBn)}
             </div>
@@ -61,11 +61,46 @@ export default function InvoicePreview({ invoice, shop = {} }) {
                 {lang === 'bn' ? shop.nameEn : shop.nameBn}
               </div>
             )}
+            {hasShopContact && (
+              <div style={{
+                marginTop: '12px',
+                padding: '10px 14px',
+                background: '#F8FAFC',
+                border: '1px solid #E2E8F0',
+                borderRadius: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '18px',
+                maxWidth: '520px',
+                boxSizing: 'border-box',
+                WebkitPrintColorAdjust: 'exact',
+                printColorAdjust: 'exact',
+              }}>
+                {shop.phone && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', flexShrink: 0 }}>
+                    <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800 }}>☎</div>
+                    <div>
+                      <div style={{ fontSize: '13px', color: '#111827', fontWeight: 800, lineHeight: 1.15 }}>{shop.phone}</div>
+                      <div style={{ fontSize: '9px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700 }}>Phone</div>
+                    </div>
+                  </div>
+                )}
+                {shop.address && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '9px', minWidth: 0 }}>
+                    <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 800, flexShrink: 0 }}>●</div>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: '13px', color: '#111827', fontWeight: 800, lineHeight: 1.25, overflowWrap: 'anywhere' }}>{shop.address}</div>
+                      <div style={{ fontSize: '9px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700 }}>Address</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
         {/* Right: INVOICE Title */}
-        <div style={{ textAlign: 'right' }}>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>
           <div style={{ fontSize: '42px', fontWeight: 900, color: '#111827', letterSpacing: '2px', textTransform: 'uppercase', lineHeight: 1 }}>
             INVOICE
           </div>
@@ -73,57 +108,18 @@ export default function InvoicePreview({ invoice, shop = {} }) {
         </div>
       </div>
 
-      {/* Shop Contact, placed near the header without overlapping invoice/customer details */}
-      {hasShopContact && (
-        <div style={{
-          marginLeft: '80px',
-          marginRight: '210px',
-          marginBottom: '34px',
-          padding: '12px 18px',
-          background: '#F8FAFC',
-          border: '1px solid #E2E8F0',
-          borderRadius: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '24px',
-          flexWrap: 'wrap',
-          boxSizing: 'border-box',
-          WebkitPrintColorAdjust: 'exact',
-          printColorAdjust: 'exact',
-        }}>
-          {shop.phone && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '155px' }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800 }}>☎</div>
-              <div>
-                <div style={{ fontSize: '13px', color: '#111827', fontWeight: 800, lineHeight: 1.2 }}>{shop.phone}</div>
-                <div style={{ fontSize: '9px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700 }}>Phone</div>
-              </div>
-            </div>
-          )}
-          {shop.address && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
-              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, flexShrink: 0 }}>●</div>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '13px', color: '#111827', fontWeight: 800, lineHeight: 1.35, overflowWrap: 'anywhere' }}>{shop.address}</div>
-                <div style={{ fontSize: '9px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700 }}>Address</div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
       {/* ── INFO SECTION ── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '32px', marginBottom: '34px' }}>
         {/* Left: Bill To */}
         <div style={{ minWidth: '300px', maxWidth: '440px' }}>
-          <div style={{ fontSize: '13px', fontWeight: 900, color: primaryColor, textTransform: 'uppercase', letterSpacing: '1.8px', marginBottom: '12px' }}>
+          <div style={{ fontSize: '15px', fontWeight: 900, color: primaryColor, textTransform: 'uppercase', letterSpacing: '1.8px', marginBottom: '14px' }}>
             Bill To
           </div>
-          <div style={{ fontSize: '26px', fontWeight: 900, color: '#111827', marginBottom: '8px', lineHeight: 1.15, overflowWrap: 'anywhere' }}>
+          <div style={{ fontSize: '32px', fontWeight: 900, color: '#111827', marginBottom: '10px', lineHeight: 1.08, overflowWrap: 'anywhere' }}>
             {invoice.customerName}
           </div>
-          {invoice.customerLocation && <div style={{ color: '#4B5563', fontSize: '17px', lineHeight: 1.35, marginBottom: '4px', overflowWrap: 'anywhere' }}>{invoice.customerLocation}</div>}
-          {invoice.customerPhone && <div style={{ color: '#4B5563', fontSize: '17px', lineHeight: 1.35 }}>{invoice.customerPhone}</div>}
+          {invoice.customerLocation && <div style={{ color: '#4B5563', fontSize: '20px', lineHeight: 1.35, marginBottom: '5px', overflowWrap: 'anywhere' }}>{invoice.customerLocation}</div>}
+          {invoice.customerPhone && <div style={{ color: '#4B5563', fontSize: '20px', lineHeight: 1.35 }}>{invoice.customerPhone}</div>}
         </div>
 
         {/* Right: Invoice Meta */}
