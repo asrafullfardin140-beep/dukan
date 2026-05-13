@@ -1,8 +1,7 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import en from '../i18n/en';
 import bn from '../i18n/bn';
-
-const LanguageContext = createContext();
+import { LanguageContext } from './languageContextValue';
 
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {
@@ -38,5 +37,3 @@ export function LanguageProvider({ children }) {
     </LanguageContext.Provider>
   );
 }
-
-export const useLanguage = () => useContext(LanguageContext);

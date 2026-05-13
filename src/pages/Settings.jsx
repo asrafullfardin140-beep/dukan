@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/languageContextValue';
 import { getShopProfile, saveShopProfile } from '../lib/storage';
 import { Camera, CheckCircle, Settings, Loader2 } from 'lucide-react';
 

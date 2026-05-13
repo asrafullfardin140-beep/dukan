@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/languageContextValue';
 import { Home, Settings } from 'lucide-react';
 
 export default function BottomNav() {

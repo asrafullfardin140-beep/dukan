@@ -1,11 +1,11 @@
 import React from 'react';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/languageContextValue';
 import { formatBDT } from '../lib/currency';
 import { amountToWords } from '../lib/amountInWords';
 import { format } from 'date-fns';
 
 export default function InvoicePreview({ invoice, shop = {} }) {
-  const { lang, toBnNum, t } = useLanguage();
+  const { lang, t } = useLanguage();
 
   if (!invoice) return null;
 
@@ -21,6 +21,7 @@ export default function InvoicePreview({ invoice, shop = {} }) {
   const statusLabel = isPaid ? 'PAID' : isUnpaid ? 'UNPAID' : 'PARTIAL';
   const statusColor = isPaid ? '#10B981' : isUnpaid ? '#EF4444' : '#F59E0B';
   const primaryColor = '#1AABDD';
+  const hasShopContact = shop.phone || shop.address;
 
   return (
     <div
@@ -36,10 +37,12 @@ export default function InvoicePreview({ invoice, shop = {} }) {
         minHeight: '1123px',
         display: 'flex',
         flexDirection: 'column',
+        WebkitPrintColorAdjust: 'exact',
+        printColorAdjust: 'exact',
       }}
     >
       {/* ── TOP HEADER ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '28px', marginBottom: hasShopContact ? '18px' : '36px' }}>
         {/* Left: Logo & Company Name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           {shop.logo ? (
@@ -70,18 +73,57 @@ export default function InvoicePreview({ invoice, shop = {} }) {
         </div>
       </div>
 
+      {/* Shop Contact, placed near the header without overlapping invoice/customer details */}
+      {hasShopContact && (
+        <div style={{
+          marginLeft: '80px',
+          marginRight: '210px',
+          marginBottom: '34px',
+          padding: '12px 18px',
+          background: '#F8FAFC',
+          border: '1px solid #E2E8F0',
+          borderRadius: '10px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '24px',
+          flexWrap: 'wrap',
+          boxSizing: 'border-box',
+          WebkitPrintColorAdjust: 'exact',
+          printColorAdjust: 'exact',
+        }}>
+          {shop.phone && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: '155px' }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800 }}>☎</div>
+              <div>
+                <div style={{ fontSize: '13px', color: '#111827', fontWeight: 800, lineHeight: 1.2 }}>{shop.phone}</div>
+                <div style={{ fontSize: '9px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700 }}>Phone</div>
+              </div>
+            </div>
+          )}
+          {shop.address && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0, flex: 1 }}>
+              <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: 800, flexShrink: 0 }}>●</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: '13px', color: '#111827', fontWeight: 800, lineHeight: 1.35, overflowWrap: 'anywhere' }}>{shop.address}</div>
+                <div style={{ fontSize: '9px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 700 }}>Address</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── INFO SECTION ── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '40px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '32px', marginBottom: '34px' }}>
         {/* Left: Bill To */}
-        <div>
-          <div style={{ fontSize: '11px', fontWeight: 800, color: primaryColor, textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '8px' }}>
+        <div style={{ minWidth: '300px', maxWidth: '440px' }}>
+          <div style={{ fontSize: '13px', fontWeight: 900, color: primaryColor, textTransform: 'uppercase', letterSpacing: '1.8px', marginBottom: '12px' }}>
             Bill To
           </div>
-          <div style={{ fontSize: '18px', fontWeight: 800, color: '#111827', marginBottom: '4px' }}>
+          <div style={{ fontSize: '26px', fontWeight: 900, color: '#111827', marginBottom: '8px', lineHeight: 1.15, overflowWrap: 'anywhere' }}>
             {invoice.customerName}
           </div>
-          {invoice.customerLocation && <div style={{ color: '#4B5563', fontSize: '13px' }}>{invoice.customerLocation}</div>}
-          {invoice.customerPhone && <div style={{ color: '#4B5563', fontSize: '13px' }}>{invoice.customerPhone}</div>}
+          {invoice.customerLocation && <div style={{ color: '#4B5563', fontSize: '17px', lineHeight: 1.35, marginBottom: '4px', overflowWrap: 'anywhere' }}>{invoice.customerLocation}</div>}
+          {invoice.customerPhone && <div style={{ color: '#4B5563', fontSize: '17px', lineHeight: 1.35 }}>{invoice.customerPhone}</div>}
         </div>
 
         {/* Right: Invoice Meta */}
@@ -108,30 +150,6 @@ export default function InvoicePreview({ invoice, shop = {} }) {
           </table>
         </div>
       </div>
-
-      {/* Shop Contact Pills (if available) */}
-      {(shop.phone || shop.address) && (
-        <div style={{ background: '#F8FAFC', padding: '12px 20px', borderRadius: '12px', display: 'flex', gap: '32px', marginBottom: '40px', border: '1px solid #F1F5F9' }}>
-          {shop.phone && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>📞</div>
-              <div>
-                <div style={{ fontSize: '12px', color: '#111827', fontWeight: 600 }}>{shop.phone}</div>
-                <div style={{ fontSize: '10px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Phone</div>
-              </div>
-            </div>
-          )}
-          {shop.address && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: primaryColor, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px' }}>📍</div>
-              <div>
-                <div style={{ fontSize: '12px', color: '#111827', fontWeight: 600 }}>{shop.address}</div>
-                <div style={{ fontSize: '10px', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Address</div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── ITEMS TABLE ── */}
       <div style={{ borderRadius: '12px', overflow: 'hidden', border: '1px solid #E2E8F0', marginBottom: '40px' }}>
@@ -231,11 +249,11 @@ export default function InvoicePreview({ invoice, shop = {} }) {
         </div>
         <div style={{ textAlign: 'center' }}>
           {shop.signature ? (
-            <img src={shop.signature} alt="Signature" style={{ width: '200px', height: '90px', objectFit: 'contain', transform: 'scale(1.5)', display: 'block', margin: '0 auto 12px' }} />
+            <img src={shop.signature} alt="Signature" crossOrigin="anonymous" style={{ width: '240px', height: '112px', objectFit: 'contain', display: 'block', margin: '0 auto 8px' }} />
           ) : (
-            <div style={{ height: '90px', width: '200px', marginBottom: '12px' }} />
+            <div style={{ height: '112px', width: '240px', marginBottom: '8px' }} />
           )}
-          <div style={{ borderTop: '2px solid #E2E8F0', paddingTop: '12px', fontWeight: 700, color: '#111827', fontSize: '14px', width: '200px', textAlign: 'center' }}>
+          <div style={{ borderTop: '2px solid #E2E8F0', paddingTop: '12px', fontWeight: 700, color: '#111827', fontSize: '14px', width: '240px', textAlign: 'center' }}>
             {t('authorizedSign')}
           </div>
         </div>

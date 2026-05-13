@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/languageContextValue';
 import { getNextInvoiceNumber, saveInvoice, getInvoices, getInvoice } from '../lib/storage';
 import { amountToWords } from '../lib/amountInWords';
 import { formatBDT } from '../lib/currency';
@@ -177,6 +177,17 @@ function StepSummary({ invoice, onChange }) {
 }
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
+function withCalculatedTotals(invoice) {
+  const subtotal = invoice.items.reduce((acc, item) => acc + Number(item.qty || 0) * Number(item.price || 0), 0);
+  const discountAmount = Number(invoice.discountAmount || 0);
+  const total = Math.max(subtotal - discountAmount, 0);
+  const received = Number(invoice.received || 0);
+  const balance = Math.max(total - received, 0);
+  const discountPercent = subtotal > 0 ? Math.round((discountAmount / subtotal) * 100) : 0;
+
+  return { ...invoice, subtotal, total, balance, discountPercent };
+}
+
 export default function NewInvoice() {
   const { t, toBnNum } = useLanguage();
   const navigate = useNavigate();
@@ -199,7 +210,7 @@ export default function NewInvoice() {
       if (id) {
         const existing = await getInvoice(id);
         if (existing) {
-          setInvoice(existing);
+          setInvoice(withCalculatedTotals(existing));
         } else {
           navigate('/');
         }
@@ -215,20 +226,9 @@ export default function NewInvoice() {
     loadData();
   }, [id, navigate]);
 
-  useEffect(() => {
-    const subtotal = invoice.items.reduce((acc, item) => acc + Number(item.qty || 0) * Number(item.price || 0), 0);
-    const discountAmount = Number(invoice.discountAmount || 0);
-    const total = Math.max(subtotal - discountAmount, 0);
-    const received = Number(invoice.received || 0);
-    const balance = Math.max(total - received, 0);
-    const discountPercent = subtotal > 0 ? Math.round((discountAmount / subtotal) * 100) : 0;
-    setInvoice((prev) => ({ ...prev, subtotal, total, balance, discountPercent }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [invoice.items, invoice.discountAmount, invoice.received]);
-
   const handleChange = useCallback((e) => {
     const { name, value } = e.target;
-    setInvoice((prev) => ({ ...prev, [name]: value }));
+    setInvoice((prev) => withCalculatedTotals({ ...prev, [name]: value }));
   }, []);
 
   const handleSelectRecent = useCallback(async (name) => {
@@ -238,15 +238,15 @@ export default function NewInvoice() {
   }, []);
 
   const addItem = useCallback(() => {
-    setInvoice((prev) => ({ ...prev, items: [...prev.items, { name: '', desc: '', qty: 1, price: '' }] }));
+    setInvoice((prev) => withCalculatedTotals({ ...prev, items: [...prev.items, { name: '', desc: '', qty: 1, price: '' }] }));
   }, []);
 
   const removeItem = useCallback((index) => {
-    setInvoice((prev) => { const items = [...prev.items]; items.splice(index, 1); return { ...prev, items }; });
+    setInvoice((prev) => { const items = [...prev.items]; items.splice(index, 1); return withCalculatedTotals({ ...prev, items }); });
   }, []);
 
   const handleItemChange = useCallback((index, field, value) => {
-    setInvoice((prev) => { const items = [...prev.items]; items[index] = { ...items[index], [field]: value }; return { ...prev, items }; });
+    setInvoice((prev) => { const items = [...prev.items]; items[index] = { ...items[index], [field]: value }; return withCalculatedTotals({ ...prev, items }); });
   }, []);
 
   const handleNext = () => {

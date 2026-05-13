@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/languageContextValue';
 import { getInvoice, deleteInvoice, getShopProfile } from '../lib/storage';
 import InvoicePreview from '../components/InvoicePreview';
 import html2canvas from 'html2canvas';
@@ -16,15 +16,79 @@ function StatusBadge({ invoice }) {
   return <span className="px-3 py-1 rounded-lg text-xs font-bold bg-purple-100 text-purple-700">PARTIAL</span>;
 }
 
+async function waitForInvoiceAssets(el) {
+  if (document.fonts?.ready) {
+    await document.fonts.ready;
+  }
+
+  const images = Array.from(el.querySelectorAll('img'));
+  await Promise.all(images.map(async (img) => {
+    if (img.complete && img.naturalWidth > 0) return;
+    if (img.decode) {
+      try {
+        await img.decode();
+        return;
+      } catch {
+        // Fall back to load/error listeners below.
+      }
+    }
+    await new Promise((resolve) => {
+      img.onload = resolve;
+      img.onerror = resolve;
+    });
+  }));
+}
+
+async function createInvoicePdf(el) {
+  el.style.visibility = 'visible';
+  el.style.position = 'fixed';
+  el.style.left = '-9999px';
+  el.style.top = '0';
+  el.style.display = 'block';
+  el.style.width = '794px';
+
+  await waitForInvoiceAssets(el);
+  await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+  const canvas = await html2canvas(el, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    backgroundColor: '#ffffff',
+    imageTimeout: 5000,
+  });
+
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const a4W = pdf.internal.pageSize.getWidth();
+  const a4H = pdf.internal.pageSize.getHeight();
+  let pdfW = a4W;
+  let pdfH = (canvas.height * pdfW) / canvas.width;
+
+  if (pdfH > a4H) {
+    pdfH = a4H;
+    pdfW = (canvas.width * pdfH) / canvas.height;
+  }
+
+  pdf.addImage(imgData, 'PNG', (a4W - pdfW) / 2, 0, pdfW, pdfH);
+  return pdf;
+}
+
+function hideInvoiceRender(el) {
+  el.style.display = 'none';
+  el.style.position = '';
+  el.style.left = '';
+  el.style.top = '';
+  el.style.visibility = '';
+}
+
 export default function InvoiceDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t } = useLanguage();
   const [invoice, setInvoice] = useState(null);
   const [shop, setShop] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [pdfLoading, setPdfLoading] = useState(false);
-  const printRef = useRef(null);
   const scaleRef = useRef(null);
   const scaleWrapRef = useRef(null);
 
@@ -45,7 +109,6 @@ export default function InvoiceDetail() {
       else {
         setInvoice(data);
         setShop(shopData);
-        setLoading(false);
         // schedule height update after render
         setTimeout(updateContainerHeight, 100);
       }
@@ -63,41 +126,16 @@ export default function InvoiceDetail() {
   const handleDownloadPdf = async () => {
     setPdfLoading(true);
     const el = document.getElementById('invoice-pdf-render');
-    if (!el) return;
-    el.style.visibility = 'visible';
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    el.style.top = '0';
-    el.style.display = 'block';
-    el.style.width = '794px'; // A4 at 96dpi
+    if (!el) { setPdfLoading(false); return; }
 
     try {
-      await new Promise((r) => setTimeout(r, 200)); // let fonts render
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const a4W = pdf.internal.pageSize.getWidth();
-      const a4H = pdf.internal.pageSize.getHeight();
-      let pdfW = a4W;
-      let pdfH = (canvas.height * pdfW) / canvas.width;
-      
-      if (pdfH > a4H) {
-        pdfH = a4H;
-        pdfW = (canvas.width * pdfH) / canvas.height;
-      }
-      
-      pdf.addImage(imgData, 'JPEG', (a4W - pdfW) / 2, 0, pdfW, pdfH);
+      const pdf = await createInvoicePdf(el);
       pdf.save(`${invoice.id}.pdf`);
     } catch (err) {
       console.error(err);
       alert('PDF generation failed. Try Print instead.');
     } finally {
-      el.style.display = 'none';
+      hideInvoiceRender(el);
       setPdfLoading(false);
     }
   };
@@ -112,34 +150,12 @@ export default function InvoiceDetail() {
     const el = document.getElementById('invoice-pdf-render');
     if (!el) { setPdfLoading(false); return; }
 
-    el.style.visibility = 'visible';
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    el.style.top = '0';
-    el.style.display = 'block';
-    el.style.width = '794px';
-
     try {
-      await new Promise((r) => setTimeout(r, 200));
-      const canvas = await html2canvas(el, { scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' });
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const a4W = pdf.internal.pageSize.getWidth();
-      const a4H = pdf.internal.pageSize.getHeight();
-      let pdfW = a4W;
-      let pdfH = (canvas.height * pdfW) / canvas.width;
-      
-      if (pdfH > a4H) {
-        pdfH = a4H;
-        pdfW = (canvas.width * pdfH) / canvas.height;
-      }
-      
-      pdf.addImage(imgData, 'JPEG', (a4W - pdfW) / 2, 0, pdfW, pdfH);
-      
+      const pdf = await createInvoicePdf(el);
       const pdfBlob = pdf.output('blob');
       const file = new File([pdfBlob], `Invoice_${invoice.id}.pdf`, { type: 'application/pdf' });
 
-      el.style.display = 'none';
+      hideInvoiceRender(el);
       setPdfLoading(false);
 
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -157,7 +173,7 @@ export default function InvoiceDetail() {
       if (err.name !== 'AbortError') {
         alert('Sharing failed. Try downloading instead.');
       }
-      el.style.display = 'none';
+      hideInvoiceRender(el);
       setPdfLoading(false);
     }
   };
@@ -167,35 +183,8 @@ export default function InvoiceDetail() {
     const el = document.getElementById('invoice-pdf-render');
     if (!el) { setPdfLoading(false); return; }
 
-    // Move off-screen (not visible but renderable)
-    el.style.display = 'block';
-    el.style.visibility = 'visible';
-    el.style.position = 'fixed';
-    el.style.left = '-9999px';
-    el.style.top = '0';
-    el.style.width = '794px';
-
     try {
-      await new Promise((r) => setTimeout(r, 300)); // wait for fonts/images
-      const canvas = await html2canvas(el, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const a4W = pdf.internal.pageSize.getWidth();
-      const a4H = pdf.internal.pageSize.getHeight();
-      let pdfW = a4W;
-      let pdfH = (canvas.height * pdfW) / canvas.width;
-      
-      if (pdfH > a4H) {
-        pdfH = a4H;
-        pdfW = (canvas.width * pdfH) / canvas.height;
-      }
-      
-      pdf.addImage(imgData, 'JPEG', (a4W - pdfW) / 2, 0, pdfW, pdfH);
+      const pdf = await createInvoicePdf(el);
 
       // Open PDF as blob URL in new tab so user can print from PDF viewer
       const blob = pdf.output('blob');
@@ -211,10 +200,7 @@ export default function InvoiceDetail() {
       console.error(err);
       alert('Could not generate print preview. Please use Download PDF instead.');
     } finally {
-      el.style.display = 'none';
-      el.style.position = '';
-      el.style.left = '';
-      el.style.top = '';
+      hideInvoiceRender(el);
       setPdfLoading(false);
     }
   };

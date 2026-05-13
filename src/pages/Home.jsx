@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '../context/LanguageContext';
+import { useLanguage } from '../context/languageContextValue';
 import { getInvoices, getShopProfile, deleteInvoice } from '../lib/storage';
 import { formatBDT } from '../lib/currency';
 import { Receipt, ChevronRight, Settings, Trash2 } from 'lucide-react';
@@ -24,9 +24,8 @@ export default function Home() {
   const [shopName, setShopName] = useState('HisabBook');
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
-    setLoading(true);
-    const data = await getInvoices();
+  const loadData = useCallback(async () => {
+    const [data, profile] = await Promise.all([getInvoices(), getShopProfile()]);
     setInvoices(data);
     let collected = 0, due = 0;
     data.forEach((inv) => {
@@ -34,13 +33,15 @@ export default function Home() {
       due += Number(inv.balance || 0);
     });
     setStats({ count: data.length, collected, due });
-    
-    const profile = await getShopProfile();
     setShopName(lang === 'bn' && profile?.nameBn ? profile.nameBn : profile?.nameEn || 'HisabBook');
     setLoading(false);
-  };
+  }, [lang]);
 
-  useEffect(() => { loadData(); }, [lang]);
+  useEffect(() => {
+    // Fetch invoices when the dashboard mounts or the selected language changes.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void loadData();
+  }, [loadData]);
 
   const handleDelete = async (e, id) => {
     e.stopPropagation();
